@@ -1,0 +1,29 @@
+version: '3.9'
+
+services:
+  todo-app:
+    build:
+      context: ./
+    command: ./wait-for-postgres.sh db ./todo-app
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_PASSWORD: qwerty
+
+  db:
+    image: postgres:latest
+    restart: always
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - ./.database/postgres/data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: qwerty
+    ports:
+      - "5436:5432"
